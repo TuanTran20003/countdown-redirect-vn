@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chuyển hướng tự động</title>
+    <meta
+      name="description"
+      content="Công cụ đếm ngược chuyển hướng tới liên kết mục tiêu với giao diện tối giản hiện đại."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="card">
+        <div class="brand-row">
+          <div class="brand-badge">↗</div>
+          <span>Redirect Timer</span>
+        </div>
+
+        <h1>Chuyển hướng tự động</h1>
+
+        <section class="redirect-form" aria-label="Cài đặt chuyển hướng">
+          <label class="field">
+            <span>Địa chỉ đích</span>
+            <input
+              id="destination"
+              name="destination"
+              type="url"
+              value="https://cticket.vn/event/bigbang2026worldtourinhanoi-tickets"
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="field">
+            <span>Thời điểm chuyển hướng</span>
+            <div class="duration-wrap">
+              <input
+                id="target-time"
+                name="target-time"
+                type="datetime-local"
+                value="2026-10-15T12:00"
+                required
+              />
+            </div>
+            <small class="field-hint">Theo múi giờ trên thiết bị của bạn.</small>
+          </label>
+
+        </section>
+
+        <div class="status-panel" aria-live="polite">
+          <div class="status-meta">
+            <span class="status-label">Trạng thái</span>
+            <span id="status-text" class="status-text idle">Sẵn sàng</span>
+          </div>
+
+          <div class="countdown-area">
+            <div class="progress-ring" aria-label="Tiến độ đếm ngược">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="track" cx="60" cy="60" r="52"></circle>
+                <circle id="progress-circle" class="progress" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <div class="countdown-text">
+                <strong id="countdown">00:00:00</strong>
+                <small>còn lại</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="message" id="message" role="alert" aria-live="assertive"></div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

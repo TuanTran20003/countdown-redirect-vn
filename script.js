@@ -4,11 +4,14 @@ const statusText = document.getElementById('status-text');
 const countdownEl = document.getElementById('countdown');
 const messageEl = document.getElementById('message');
 const progressCircle = document.getElementById('progress-circle');
+const alarmToggle = document.getElementById('alarm-toggle');
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * 52;
 let timerId = null;
 let initialDuration = 0;
 let redirecting = false;
+let alarmEnabled = false;
+let audioContext = null;
 
 function updateMessage(text, type = '') {
   messageEl.textContent = text;
@@ -84,6 +87,54 @@ function getTargetTimestamp() {
   return new Date(targetTimeInput.value).getTime();
 }
 
+async function toggleAlarm() {
+  if (alarmEnabled) {
+    alarmEnabled = false;
+    alarmToggle.textContent = 'Bật chuông báo';
+    alarmToggle.setAttribute('aria-pressed', 'false');
+    updateMessage('Chuông báo đã tắt.');
+    return;
+  }
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) {
+    updateMessage('Trình duyệt này không hỗ trợ phát chuông báo.', 'error');
+    return;
+  }
+
+  try {
+    audioContext = audioContext || new AudioContextClass();
+    await audioContext.resume();
+    alarmEnabled = true;
+    alarmToggle.textContent = 'Tắt chuông báo';
+    alarmToggle.setAttribute('aria-pressed', 'true');
+    updateMessage('Đã bật chuông. Chuông sẽ reo khi chuyển sang trang vé.');
+  } catch (error) {
+    updateMessage('Không thể bật chuông. Hãy kiểm tra cài đặt âm thanh của trình duyệt.', 'error');
+  }
+}
+
+function playAlarm() {
+  if (!alarmEnabled || !audioContext || audioContext.state !== 'running') {
+    return;
+  }
+
+  const startAt = audioContext.currentTime;
+  for (const offset of [0, 0.45, 0.9]) {
+    const oscillator = audioContext.createOscillator();
+    const volume = audioContext.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, startAt + offset);
+    volume.gain.setValueAtTime(0.0001, startAt + offset);
+    volume.gain.exponentialRampToValueAtTime(0.22, startAt + offset + 0.025);
+    volume.gain.exponentialRampToValueAtTime(0.0001, startAt + offset + 0.32);
+    oscillator.connect(volume);
+    volume.connect(audioContext.destination);
+    oscillator.start(startAt + offset);
+    oscillator.stop(startAt + offset + 0.34);
+  }
+}
+
 function tick() {
   if (redirecting) {
     return;
@@ -110,11 +161,19 @@ function tick() {
     }
 
     redirecting = true;
-    setStatus('complete', 'Đang chuyển hướng');
-    updateMessage(`Đang mở ${destinationInput.value.trim()}...`, 'success');
     clearInterval(timerId);
     timerId = null;
-    window.location.assign(destinationInput.value.trim());
+    const destination = destinationInput.value.trim();
+    if (alarmEnabled && audioContext?.state === 'running') {
+      setStatus('complete', 'Chuông báo');
+      updateMessage('Chuông đang reo. Đang chuyển sang trang vé...', 'success');
+      playAlarm();
+      window.setTimeout(() => window.location.assign(destination), 1600);
+    } else {
+      setStatus('complete', 'Đang chuyển hướng');
+      updateMessage(`Đang mở ${destination}...`, 'success');
+      window.location.assign(destination);
+    }
     return;
   }
 
@@ -147,5 +206,6 @@ destinationInput.addEventListener('input', () => {
 
 targetTimeInput.addEventListener('input', restartClock);
 targetTimeInput.addEventListener('change', restartClock);
+alarmToggle.addEventListener('click', toggleAlarm);
 
 restartClock();

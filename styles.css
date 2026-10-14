@@ -122,6 +122,24 @@ h1 {
   font-size: 0.8rem;
 }
 
+.alarm-toggle {
+  justify-self: start;
+  border: 1px solid rgba(124, 156, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(124, 156, 255, 0.1);
+  color: var(--text);
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.alarm-toggle:hover,
+.alarm-toggle[aria-pressed="true"] {
+  background: rgba(61, 213, 152, 0.12);
+  border-color: rgba(61, 213, 152, 0.36);
+}
+
 .status-panel {
   margin-top: 28px;
   display: grid;

@@ -120,18 +120,27 @@ function playAlarm() {
   }
 
   const startAt = audioContext.currentTime;
-  for (const offset of [0, 0.45, 0.9]) {
+  const duration = 3;
+  const frequencies = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.5];
+  let offset = 0;
+
+  while (offset < duration) {
+    const noteDuration = Math.min(0.14 + Math.random() * 0.19, duration - offset);
     const oscillator = audioContext.createOscillator();
     const volume = audioContext.createGain();
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(880, startAt + offset);
+    oscillator.type = ['sine', 'triangle', 'square'][Math.floor(Math.random() * 3)];
+    oscillator.frequency.setValueAtTime(
+      frequencies[Math.floor(Math.random() * frequencies.length)],
+      startAt + offset,
+    );
     volume.gain.setValueAtTime(0.0001, startAt + offset);
-    volume.gain.exponentialRampToValueAtTime(0.22, startAt + offset + 0.025);
-    volume.gain.exponentialRampToValueAtTime(0.0001, startAt + offset + 0.32);
+    volume.gain.exponentialRampToValueAtTime(0.16, startAt + offset + 0.015);
+    volume.gain.exponentialRampToValueAtTime(0.0001, startAt + offset + noteDuration);
     oscillator.connect(volume);
     volume.connect(audioContext.destination);
     oscillator.start(startAt + offset);
-    oscillator.stop(startAt + offset + 0.34);
+    oscillator.stop(startAt + offset + noteDuration + 0.01);
+    offset += noteDuration + 0.04 + Math.random() * 0.08;
   }
 }
 
@@ -168,7 +177,7 @@ function tick() {
       setStatus('complete', 'Chuông báo');
       updateMessage('Chuông đang reo. Đang chuyển sang trang vé...', 'success');
       playAlarm();
-      window.setTimeout(() => window.location.assign(destination), 1600);
+      window.setTimeout(() => window.location.assign(destination), 3100);
     } else {
       setStatus('complete', 'Đang chuyển hướng');
       updateMessage(`Đang mở ${destination}...`, 'success');
@@ -188,7 +197,7 @@ function restartClock() {
     ? Math.max(0, (targetTimestamp - Date.now()) / 1000)
     : 0;
   if (initialDuration > 0 && validateUrl(destinationInput.value)) {
-    updateMessage('Bộ đếm tự chạy theo thời gian thực và sẽ tự mở liên kết khi về 0.');
+    updateMessage('Bộ đếm tự chạy và sẽ báo chuông 3 giây trước khi mở liên kết.');
   }
   tick();
   if (!redirecting) {
